@@ -58,6 +58,16 @@
 		endif
 	endfunction "}}}
 
+	function! EasyMotion#NormalMotionMappings() "{{{
+		silent exec 'nnoremap <silent> f :call EasyMotion#Finline(0, 0)<CR>'
+		silent exec 'onoremap <silent> f :call EasyMotion#Finline(0, 0)<CR>'
+		silent exec 'vnoremap <silent> f :<C-U>call EasyMotion#Finline(1, 0)<CR>'
+		silent exec 'nnoremap <silent> F :call EasyMotion#Finline(0, 1)<CR>'
+		silent exec 'onoremap <silent> F :call EasyMotion#Finline(0, 1)<CR>'
+		silent exec 'vnoremap <silent> F :<C-U>call EasyMotion#Finline(1, 1)<CR>'
+
+	endfunction "}}}
+
 	function! EasyMotion#SelectLinesMappings(motion) "{{{
 
 		if g:EasyMotion_special_select_line
@@ -149,6 +159,18 @@
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
 	endfunction
 
+
+	function! EasyMotion#Finline(visualmode, direction) " {{{
+		let char = s:GetSearchChar(a:visualmode)
+
+		if empty(char)
+			return
+		endif
+
+		let re = '\C' . escape(char, '.$^~')
+
+		call s:EasyMotion(re, a:direction, a:visualmode ? visualmode() : '', mode(1), 1, 0, 0, 0, 1)
+	endfunction " }}}
 
 	function! EasyMotion#F(visualmode, direction) " {{{
 		let char = s:GetSearchChar(a:visualmode)
@@ -677,6 +699,8 @@
 
 		let hlchar = a:0 >= 4 ? a:4 : 0
 
+		let inline = a:0 >=5 ? a:5 : 0
+
 		let orig_pos = [line('.'), col('.')]
 		let targets = []
 
@@ -693,6 +717,9 @@
 			" Find motion targets {{{
 				let search_direction = (a:direction >= 1 ? 'b' : '')
 				let search_stopline = line(a:direction >= 1 ? 'w0' : 'w$')
+				if inline == 1
+					let search_stopline = line('.')
+				endif
 
 				let search_at_cursor = fixed_column ? 'c' : ''
 				while 1
@@ -759,10 +786,10 @@
 
 					if a:direction == 1
 						" Backward
-						let shade_hl_re = '\%'. line('w0') .'l\_.*' . shade_hl_pos
+						let shade_hl_re = '\%'. line(inline ? '.' : 'w0') .'l\_.*' . shade_hl_pos
 					elseif a:direction == 0
 						" Forward
-						let shade_hl_re = shade_hl_pos . '\_.*\%'. line('w$') .'l'
+						let shade_hl_re = shade_hl_pos . '\_.*\%'. line(inline ? '.' : 'w$') .'l'
 					elseif a:direction == 2
 						" Both directions"
 						let shade_hl_re = '\%'. line('w0') .'l\_.*\%'. line('w$') .'l'
