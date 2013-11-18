@@ -63,6 +63,7 @@
 		if g:EasyMotion_special_select_line
 			silent exec 'onoremap <silent> ' . a:motion . ' :call EasyMotion#SelectLines()<CR>'
 			silent exec 'nnoremap <silent> v' . a:motion . ' :call EasyMotion#SelectLines()<CR>'
+			silent exec 'nnoremap <silent> d' . a:motion . ' :call EasyMotion#SelectLinesDelete()<CR>'
 			silent exec 'nnoremap <silent> y' . a:motion . ' :call EasyMotion#SelectLinesYank()<CR>'
 		endif
 	endfunction "}}}
@@ -77,14 +78,11 @@
 " }}}
 " Motion functions {{{
 
-	function! EasyMotion#SelectLinesPaste()
+	function! EasyMotion#SelectLinesDelete()
 		let orig_pos = [line('.'), col('.')]
 		call EasyMotion#SelectLines()
-		normal y
+		normal d
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
-		if !g:EasyMotion_cancelled
-			normal p
-		endif
 	endfunction
 
 	function! EasyMotion#SelectLinesYank()
