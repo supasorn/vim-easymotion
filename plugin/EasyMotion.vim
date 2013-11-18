@@ -101,7 +101,7 @@
 	" Special mapping for other functions {{{
 		call EasyMotion#SelectLinesMappings('l')
 		call EasyMotion#SelectPhraseMappings('p')
-		call EasyMotion#NormalMotionMappings()
+		"call EasyMotion#NormalMotionMappings()
 	" }}}
 " }}}
 
