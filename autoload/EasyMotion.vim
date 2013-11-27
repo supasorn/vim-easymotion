@@ -91,14 +91,14 @@
 	function! EasyMotion#SelectLinesDelete()
 		let orig_pos = [line('.'), col('.')]
 		call EasyMotion#SelectLines()
-		normal d
+		normal! d
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
 	endfunction
 
 	function! EasyMotion#SelectLinesYank()
 		let orig_pos = [line('.'), col('.')]
 		call EasyMotion#SelectLines()
-		normal y
+		normal! y
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
 		"normal p
 	endfunction
@@ -155,7 +155,7 @@
 		let orig_pos = [line('.'), col('.')]
 
 		call EasyMotion#SelectPhrase()
-		normal y
+		normal! y
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
 	endfunction
 
