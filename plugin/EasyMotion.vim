@@ -45,7 +45,7 @@
 		\   'gui'     : ['NONE', '#b98300' , 'bold']
 		\ , 'cterm256': ['NONE', '3'       , 'bold']
 		\ , 'cterm'   : ['NONE', '3'       , 'bold']
-		\ }  
+		\ }
 
 		let s:shade_hl_defaults = {
 		\   'gui'     : ['NONE', '#777777' , 'NONE']
@@ -99,8 +99,10 @@
 		\ })
 	" }}}
 	" Special mapping for other functions {{{
-		call EasyMotion#SelectLinesMappings('l')
-		call EasyMotion#SelectPhraseMappings('p')
+		call EasyMotion#InitSpecialMappings({
+		\   'l' : { 'name': 'SelectLines' , 'flag': 'select_line' }
+		\ , 'p' : { 'name': 'SelectPhrase' , 'flag': 'select_phrase' }
+		\ })
 		"call EasyMotion#NormalMotionMappings()
 	" }}}
 " }}}

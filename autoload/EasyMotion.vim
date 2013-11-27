@@ -51,9 +51,29 @@
 					continue
 				endif
 
-				silent exec 'nnoremap <silent> ' . g:EasyMotion_mapping_{motion} . '      :call EasyMotion#' . fn.name . '(0, ' . fn.dir . ')<CR>'
-				silent exec 'onoremap <silent> ' . g:EasyMotion_mapping_{motion} . '      :call EasyMotion#' . fn.name . '(0, ' . fn.dir . ')<CR>'
+				silent exec 'nnoremap <silent> ' . g:EasyMotion_mapping_{motion} . ' :call EasyMotion#' . fn.name . '(0, ' . fn.dir . ')<CR>'
+				silent exec 'onoremap <silent> ' . g:EasyMotion_mapping_{motion} . ' :call EasyMotion#' . fn.name . '(0, ' . fn.dir . ')<CR>'
 				silent exec 'vnoremap <silent> ' . g:EasyMotion_mapping_{motion} . ' :<C-U>call EasyMotion#' . fn.name . '(1, ' . fn.dir . ')<CR>'
+			endfor
+		endif
+	endfunction "}}}
+	function! EasyMotion#InitSpecialMappings(motions) "{{{
+		for motion in keys(a:motions)
+			call EasyMotion#InitOptions({ 'special_mapping_' . motion : g:EasyMotion_leader_key . motion })
+		endfor
+
+		if g:EasyMotion_do_mapping
+			for [motion, fn] in items(a:motions)
+				if empty(g:EasyMotion_special_mapping_{motion})
+					continue
+				endif
+
+				if g:EasyMotion_special_{fn.flag}
+					silent exec 'onoremap <silent> ' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . '()<CR>'
+					silent exec 'nnoremap <silent> v' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . '()<CR>'
+					silent exec 'nnoremap <silent> y' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . 'Yank()<CR>'
+					silent exec 'nnoremap <silent> d' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . 'Delete()<CR>'
+				endif
 			endfor
 		endif
 	endfunction "}}}
@@ -66,58 +86,55 @@
 
 	endfunction "}}}
 
-	function! EasyMotion#SelectLinesMappings(motion) "{{{
-
-		if g:EasyMotion_special_select_line
-			silent exec 'onoremap <silent> ' . a:motion . ' :call EasyMotion#SelectLines()<CR>'
-			silent exec 'nnoremap <silent> v' . a:motion . ' :call EasyMotion#SelectLines()<CR>'
-			silent exec 'nnoremap <silent> d' . a:motion . ' :call EasyMotion#SelectLinesDelete()<CR>'
-			silent exec 'nnoremap <silent> y' . a:motion . ' :call EasyMotion#SelectLinesYank()<CR>'
-		endif
-	endfunction "}}}
-
-	function! EasyMotion#SelectPhraseMappings(motion) "{{{
-		if g:EasyMotion_special_select_phrase
-			silent exec 'onoremap <silent> ' . a:motion . ' :call EasyMotion#SelectPhrase()<CR>'
-			silent exec 'nnoremap <silent> v' . a:motion . ' :call EasyMotion#SelectPhrase()<CR>'
-			silent exec 'nnoremap <silent> y' . a:motion . ' :call EasyMotion#SelectPhraseYank()<CR>'
-		endif
-	endfunction "}}}
 " }}}
 " Motion functions {{{
 
 	function! EasyMotion#SelectLinesDelete()
 		let orig_pos = [line('.'), col('.')]
-		call EasyMotion#SelectLines()
-		normal d
-		keepjumps call cursor(orig_pos[0], orig_pos[1])
+		" if cancelled?
+		if EasyMotion#SelectLines()
+			" Prepare the number of lines "{{{
+			let start_of_line = line("v")
+			silent exec "normal!" "o"
+			let end_of_line = line("v")
+			"}}}
+			normal! d
+			if orig_pos[0] < max([start_of_line,end_of_line])
+				keepjumps call cursor(orig_pos[0], orig_pos[1])
+			else
+				" if delete lines above cursor line
+				keepjumps call cursor(orig_pos[0]-abs(end_of_line-start_of_line)-1, orig_pos[1])
+			endif
+		else
+			keepjumps call cursor(orig_pos[0], orig_pos[1])
+		endif
 	endfunction
 
 	function! EasyMotion#SelectLinesYank()
 		let orig_pos = [line('.'), col('.')]
 		call EasyMotion#SelectLines()
-		normal y
+		normal! y
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
-		"normal p
 	endfunction
 
 	function! EasyMotion#SelectLines()
 		let orig_pos = [line('.'), col('.')]
 
 		call s:EasyMotion('^\(\w\|\s*\zs\|$\)', 2, '', '', 0, 0, 1)
-		if g:EasyMotion_cancelled 
+		if g:EasyMotion_cancelled
 			keepjumps call cursor(orig_pos[0], orig_pos[1])
 			return ''
 		else
 			let pos1 = [line('.'), col('.')]
 			keepjumps call cursor(orig_pos[0], orig_pos[1])
 			call s:EasyMotion('^\(\w\|\s*\zs\|$\)', 2, '', '', pos1[0], 1, 1)
-			if g:EasyMotion_cancelled 
+			if g:EasyMotion_cancelled
 				keepjumps call cursor(orig_pos[0], orig_pos[1])
 				return ''
 			else
 				normal! V
 				keepjumps call cursor(pos1[0], pos1[1])
+				return 1
 			endif
 		endif
 	endfunction
@@ -130,21 +147,22 @@
 
 		let orig_pos = [line('.'), col('.')]
 
-		let re = '\C' . escape(chars[0], '.$^~') . '\|\C' . escape(chars[1], '.$^~')  
+		let re = '\C' . escape(chars[0], '.$^~') . '\|\C' . escape(chars[1], '.$^~')
 		call s:EasyMotion(re, 2, '', '', 0, 0, 0, 0)
-		if g:EasyMotion_cancelled 
+		if g:EasyMotion_cancelled
 			keepjumps call cursor(orig_pos[0], orig_pos[1])
 			return ''
 		else
 			let pos1 = [line('.'), col('.')]
 			keepjumps call cursor(orig_pos[0], orig_pos[1])
 			call s:EasyMotion(re, 2, '', '', 0, 0, 0, pos1)
-			if g:EasyMotion_cancelled 
+			if g:EasyMotion_cancelled
 				keepjumps call cursor(orig_pos[0], orig_pos[1])
 				return ''
 			else
 				normal! v
 				keepjumps call cursor(pos1[0], pos1[1])
+				return 1
 			endif
 		endif
 	endfunction
@@ -153,8 +171,29 @@
 		let orig_pos = [line('.'), col('.')]
 
 		call EasyMotion#SelectPhrase()
-		normal y
+		normal! y
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
+	endfunction
+	function! EasyMotion#SelectPhraseDelete()
+		let orig_pos = [line('.'), col('.')]
+
+		" If cancelled?
+		if EasyMotion#SelectPhrase()
+			" Prepare the number of lines "{{{
+			let start_of_line = line("v")
+			silent exec "normal!" "o"
+			let end_of_line = line("v")
+			"}}}
+			normal! d
+			if orig_pos[0] < max([start_of_line,end_of_line])
+				keepjumps call cursor(orig_pos[0], orig_pos[1])
+			else
+				" if you delete phrase above cursor line and phrase is over lines
+				keepjumps call cursor(orig_pos[0]-abs(end_of_line-start_of_line), orig_pos[1])
+			endif
+		else
+			keepjumps call cursor(orig_pos[0], orig_pos[1])
+		endif
 	endfunction
 
 
@@ -285,7 +324,7 @@
 
 	function! s:GetSearchChar2(visualmode) " {{{
 
-		let chars = [] 
+		let chars = []
 		for i in [1, 2]
 			redraw
 
@@ -543,8 +582,8 @@
 			" Solve multibyte issues by matching the byte column
 			" number instead of the visual column
 			let col_num -= lines[line_num]['mb_compensation']
-			if a:fixed_column 
-				let firstS = match(lines[line_num]['marker'], '\S') 
+			if a:fixed_column
+				let firstS = match(lines[line_num]['marker'], '\S')
 				if firstS >= 4
 					let leftText = strpart(lines[line_num]['marker'], 0, firstS - 3)
 				else
@@ -566,8 +605,8 @@
 					let text = target_key
 					call add(hl2_first_coords, '\%' . line_num . 'l\%1c')
 					call add(hl2_second_coords, '\%' . line_num . 'l\%2c')
-				endif 
-				let lines[line_num]['marker'] = text . ' ' . lines[line_num]['marker'] 
+				endif
+				let lines[line_num]['marker'] = text . ' ' . lines[line_num]['marker']
 
 				"if target_key_len < 2
 					"let text = target_key . ' '
@@ -576,7 +615,7 @@
 					"let text = target_key
 					"call add(hl2_first_coords, '\%' . line_num . 'l\%' . (strlen(lines[line_num]['marker']) + 1) . 'c')
 					"call add(hl2_second_coords, '\%' . line_num . 'l\%' . (strlen(lines[line_num]['marker']) + 2) . 'c')
-				"endif 
+				"endif
 				"let lines[line_num]['marker'] = lines[line_num]['marker'] . text
 			else
 				if strlen(lines[line_num]['marker']) > 0
@@ -618,7 +657,7 @@
 		let lines_items = items(lines)
 		" }}}
 		" Highlight targets {{{
-			if len(hl_coords) > 0 
+			if len(hl_coords) > 0
 				let target_hl_id = matchadd(g:EasyMotion_hl_group_target, join(hl_coords, '\|'), 1)
 			endif
 			if len(hl2_second_coords) > 0
@@ -644,8 +683,11 @@
 			" Restore original lines
 			call s:SetLines(lines_items, 'orig')
 
+				" Break undo history
+				silent exec 'normal!' "i\<C-g>u\<ESC>"
+
 			" Un-highlight targets {{{
-				if exists('target_hl_id') 
+				if exists('target_hl_id')
 					call matchdelete(target_hl_id)
 				endif
 				if exists('target_hl2_first_id')
@@ -687,9 +729,9 @@
 
 	function! s:EasyMotion(regexp, direction, visualmode, mode, ...) " {{{
 		" For SelectLines(), to highlight previous selected line
-		let hlcurrent = a:0 >= 1 ? a:1 : 0 
-		" For SelectLines(), to allows '.' to repeat the previously pressed 
-		" character 
+		let hlcurrent = a:0 >= 1 ? a:1 : 0
+		" For SelectLines(), to allows '.' to repeat the previously pressed
+		" character
 		let allows_repeat = a:0 >= 2 ? a:2 : 0
 		" For SelectLines(), a flag to display character only at the beginning
 		" of the line
@@ -796,7 +838,7 @@
 						let shade_hl_id = matchadd(g:EasyMotion_hl_group_shade, shade_hl_re, 0)
 					endif
 				endif
-				if hlcurrent != 0 
+				if hlcurrent != 0
 					let shade_hl_line_id = matchadd(g:EasyMotion_hl_line_group_shade, '\%'. hlcurrent .'l.*', 1)
 				endif
 				if !empty(hlchar)
