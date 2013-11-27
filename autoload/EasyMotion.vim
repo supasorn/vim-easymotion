@@ -67,12 +67,13 @@
 				if empty(g:EasyMotion_special_mapping_{motion})
 					continue
 				endif
-					silent exec 'onoremap <silent> ' .  g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . '()<CR>'
-					silent exec 'nnoremap <silent> v' .  g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . '()<CR>'
-					silent exec 'nnoremap <silent> y' .  g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . 'Yank()<CR>'
-					if fn.flag ==# 'select_line'
-						silent exec 'nnoremap <silent> d' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#SelectLinesDelete()<CR>'
-					endif
+
+				if g:EasyMotion_special_{fn.flag}
+					silent exec 'onoremap <silent> ' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . '()<CR>'
+					silent exec 'nnoremap <silent> v' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . '()<CR>'
+					silent exec 'nnoremap <silent> y' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . 'Yank()<CR>'
+					silent exec 'nnoremap <silent> d' . g:EasyMotion_special_mapping_{motion} . ' :call EasyMotion#' . fn.name . 'Delete()<CR>'
+				endif
 			endfor
 		endif
 	endfunction "}}}
@@ -157,6 +158,13 @@
 		normal! y
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
 	endfunction
+	function! EasyMotion#SelectPhraseDelete() "{{{
+		let orig_pos = [line('.'), col('.')]
+
+		call EasyMotion#SelectPhrase()
+		normal! d
+		keepjumps call cursor(orig_pos[0], orig_pos[1])
+	endfunction "}}}
 
 
 	function! EasyMotion#Finline(visualmode, direction) " {{{
