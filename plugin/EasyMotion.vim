@@ -99,8 +99,10 @@
 		\ })
 	" }}}
 	" Special mapping for other functions {{{
-		call EasyMotion#SelectLinesMappings('l')
-		call EasyMotion#SelectPhraseMappings('p')
+		call EasyMotion#InitSpecialMappings({
+		\   'l' : { 'name': 'SelectLines' , 'flag': 'select_line' }
+		\ , 'p' : { 'name': 'SelectPhrase' , 'flag': 'select_phrase' }
+		\ })
 		"call EasyMotion#NormalMotionMappings()
 	" }}}
 " }}}
