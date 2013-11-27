@@ -91,9 +91,23 @@
 
 	function! EasyMotion#SelectLinesDelete()
 		let orig_pos = [line('.'), col('.')]
-		call EasyMotion#SelectLines()
-		normal! d
-		keepjumps call cursor(orig_pos[0], orig_pos[1])
+		" if cancelled?
+		if EasyMotion#SelectLines()
+			" Prepare the number of lines "{{{
+			let start_of_line = line("v")
+			silent exec "normal!" "o"
+			let end_of_line = line("v")
+			"}}}
+			normal! d
+			if orig_pos[0] < max([start_of_line,end_of_line])
+				keepjumps call cursor(orig_pos[0], orig_pos[1])
+			else
+				" if delete lines above cursor line
+				keepjumps call cursor(orig_pos[0]-abs(end_of_line-start_of_line)-1, orig_pos[1])
+			endif
+		else
+			keepjumps call cursor(orig_pos[0], orig_pos[1])
+		endif
 	endfunction
 
 	function! EasyMotion#SelectLinesYank()
@@ -120,6 +134,7 @@
 			else
 				normal! V
 				keepjumps call cursor(pos1[0], pos1[1])
+				return 1
 			endif
 		endif
 	endfunction
@@ -147,6 +162,7 @@
 			else
 				normal! v
 				keepjumps call cursor(pos1[0], pos1[1])
+				return 1
 			endif
 		endif
 	endfunction
@@ -158,13 +174,27 @@
 		normal! y
 		keepjumps call cursor(orig_pos[0], orig_pos[1])
 	endfunction
-	function! EasyMotion#SelectPhraseDelete() "{{{
+	function! EasyMotion#SelectPhraseDelete()
 		let orig_pos = [line('.'), col('.')]
 
-		call EasyMotion#SelectPhrase()
-		normal! d
-		keepjumps call cursor(orig_pos[0], orig_pos[1])
-	endfunction "}}}
+		" If cancelled?
+		if EasyMotion#SelectPhrase()
+			" Prepare the number of lines "{{{
+			let start_of_line = line("v")
+			silent exec "normal!" "o"
+			let end_of_line = line("v")
+			"}}}
+			normal! d
+			if orig_pos[0] < max([start_of_line,end_of_line])
+				keepjumps call cursor(orig_pos[0], orig_pos[1])
+			else
+				" if you delete phrase above cursor line and phrase is over lines
+				keepjumps call cursor(orig_pos[0]-abs(end_of_line-start_of_line), orig_pos[1])
+			endif
+		else
+			keepjumps call cursor(orig_pos[0], orig_pos[1])
+		endif
+	endfunction
 
 
 	function! EasyMotion#Finline(visualmode, direction) " {{{
