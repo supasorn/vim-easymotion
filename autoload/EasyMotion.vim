@@ -221,6 +221,9 @@
 	function! EasyMotion#EW(visualmode, direction) " {{{
 		call s:EasyMotion('\(\S\(\s\|$\)\|^$\)', a:direction, a:visualmode ? visualmode() : '', mode(1))
 	endfunction " }}}
+	function! EasyMotion#Eol(visualmode, direction) " {{{
+		call s:EasyMotion('\(.\)$', a:direction, a:visualmode ? visualmode() : '', '')
+	endfunction " }}}
 	function! EasyMotion#JK(visualmode, direction) " {{{
 		call s:EasyMotion('^\(\w\|\s*\zs\|$\)', a:direction, a:visualmode ? visualmode() : '', '')
 	endfunction " }}}
