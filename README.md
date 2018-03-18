@@ -12,15 +12,15 @@
 
 Two-key combo
 
-![two-character key](http://homes.cs.washington.edu/~supasorn/easymotion.gif)
+![two-character key](http://www.supasorn.com/easymotion.gif)
 
 Select lines using `vl`
 
-![two-character key](http://homes.cs.washington.edu/~supasorn/easymotion2.gif)
+![two-character key](http://www.supasorn.com/easymotion2.gif)
 
 Yank lines using `yl`. You can copy lines without moving cursor back and forth between line you want to yank and line you want to paste.
 
-![two-character key](http://homes.cs.washington.edu/~supasorn/easymotion3.gif)
+![two-character key](http://www.supasorn.com/easymotion3.gif)
 
 This is an alpha version, which breaks multi-byte support, and others.
 # Introduction
