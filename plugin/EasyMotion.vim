@@ -38,13 +38,13 @@
 
 		let s:target_hl2_first_defaults = {
 		\   'gui'     : ['NONE', '#ffb400' , 'bold']
-		\ , 'cterm256': ['NONE', '11'      , 'bold']
+		\ , 'cterm256': ['NONE', '220'     , 'bold']
 		\ , 'cterm'   : ['NONE', '11'      , 'bold']
 		\ }
 
 		let s:target_hl2_second_defaults = {
 		\   'gui'     : ['NONE', '#b98300' , 'bold']
-		\ , 'cterm256': ['NONE', '3'       , 'bold']
+		\ , 'cterm256': ['NONE', '166'     , 'bold']
 		\ , 'cterm'   : ['NONE', '3'       , 'bold']
 		\ }  
 
